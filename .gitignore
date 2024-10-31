@@ -1,0 +1,30 @@
+# Environment Variables
+.env
+
+# Python compiled files
+__pycache__/
+*.pyc
+*.pyo
+
+# Django files
+db.sqlite3
+media/
+
+# Static files collected in production
+staticfiles/
+static/
+
+# Logs and temporary files
+*.log
+
+# Virtual environment
+venv/
+env/
+beauty_shop_venv/
+
+# IDE files
+.vscode/
+.idea/
+
+# Node.js dependencies
+node_modules/
