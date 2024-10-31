@@ -21,6 +21,9 @@ from django.urls import path
 from beauty_shop import settings
 
 urlpatterns = [
+    # path('', include('products.urls')),
+    # path('cart/', include('cart.urls')),
+    # path('orders/', include('orders.urls')),
     path('admin/', admin.site.urls),
 ]
 
