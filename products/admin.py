@@ -8,9 +8,10 @@ from .models import (
     SubCategory,
     Attribute,
     Product,
-    ProductAttribute,
+    Variant,
+    VariantAttribute,
     ProductSubCategory,
-    ProductImage,
+    VariantImage,
     ProductReview
 )
 
@@ -26,7 +27,7 @@ class CategoryAdmin(admin.ModelAdmin):
         """
             Display subcategories of a category
         """
-        return ', '.join([sc.name for sc in obj.subcategories.all()])
+        return ', '.join([subcat.name for subcat in obj.subcategories.all()])
     get_subcategories.short_description = 'Subcategories'
 
 
@@ -49,7 +50,7 @@ class ProductAdmin(admin.ModelAdmin):
     """
         Set up for product
     """
-    list_display = ('name', 'description',  'price')
+    list_display = ('name', 'description')
     list_display_links = ('name',)
 
 
@@ -67,7 +68,8 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(SubCategory, SubCategoryAdmin)
 admin.site.register(Attribute)
 admin.site.register(Product, ProductAdmin)
-admin.site.register(ProductAttribute)
+admin.site.register(Variant)
+admin.site.register(VariantAttribute)
 admin.site.register(ProductSubCategory, ProductSubcategoryAdmin)
-admin.site.register(ProductImage)
+admin.site.register(VariantImage)
 admin.site.register(ProductReview)
