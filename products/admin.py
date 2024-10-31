@@ -8,10 +8,13 @@ from .models import (
     SubCategory,
     Attribute,
     Product,
-    ProductAttribute,
+    Variant,
+    VariantAttribute,
     ProductSubCategory,
     ProductImage,
-    ProductReview
+    ProductReview,
+    Size,
+    VariantSize,
 )
 
 
@@ -26,7 +29,7 @@ class CategoryAdmin(admin.ModelAdmin):
         """
             Display subcategories of a category
         """
-        return ', '.join([sc.name for sc in obj.subcategories.all()])
+        return ', '.join([subcat.name for subcat in obj.subcategories.all()])
     get_subcategories.short_description = 'Subcategories'
 
 
@@ -49,8 +52,15 @@ class ProductAdmin(admin.ModelAdmin):
     """
         Set up for product
     """
-    list_display = ('name', 'description',  'price')
+    list_display = ('name', 'description', 'get_variants')
     list_display_links = ('name',)
+
+    def get_variants(self, obj):
+        """
+            Display variants of a product
+        """
+        return ', '.join([c.name for c in obj.variants.all()])
+    get_variants.short_description = 'Variants'
 
 
 class ProductSubcategoryAdmin(admin.ModelAdmin):
@@ -62,12 +72,30 @@ class ProductSubcategoryAdmin(admin.ModelAdmin):
     list_display_links = ('subcategory',)
 
 
+class VariantAdmin(admin.ModelAdmin):
+    """
+        Set up for product
+    """
+    list_display = ('name', 'get_product')
+    list_display_links = ('name',)
+
+    def get_product(self, obj):
+        """
+            Display product
+        """
+        return obj.product
+    get_product.short_description = 'Product'
+
+
 # Register your models here.
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(SubCategory, SubCategoryAdmin)
 admin.site.register(Attribute)
 admin.site.register(Product, ProductAdmin)
-admin.site.register(ProductAttribute)
+admin.site.register(Variant, VariantAdmin)
+admin.site.register(VariantAttribute)
 admin.site.register(ProductSubCategory, ProductSubcategoryAdmin)
 admin.site.register(ProductImage)
 admin.site.register(ProductReview)
+admin.site.register(Size)
+admin.site.register(VariantSize)

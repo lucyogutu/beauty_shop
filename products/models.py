@@ -26,6 +26,17 @@ from django.utils.text import slugify
 # Create your models here.
 
 
+SIZE_TYPE_CHOICES = {
+    "ml": "ml",
+    "l": "l",
+    "g": "g",
+    "kg": "kg",
+    "S": "small",
+    "M": "medium",
+    "L": "large",
+}
+
+
 class BaseModel(models.Model):
     """
     Base model for all other models.
@@ -94,12 +105,16 @@ class Product(BaseModel):
     """
     name = models.CharField(max_length=100)
     description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    stock = models.PositiveIntegerField()
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
     subcategory = models.ManyToManyField(
         SubCategory,
         through='ProductSubCategory')
-    attribute = models.ManyToManyField(Attribute, through='ProductAttribute')
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -108,6 +123,13 @@ class Product(BaseModel):
 
     def __str__(self):
         return f'{self.name}'
+
+    # def get_first_variant_price(self):
+    #     """
+    #         Get the price of the first variant and display
+    #     """
+    #     first_variant = self.variants.first()
+    #     return first_variant.price if first_variant else None
 
 
 class ProductSubCategory(BaseModel):
@@ -122,17 +144,76 @@ class ProductSubCategory(BaseModel):
         return f'{self.product} : {self.subcategory}'
 
 
-class ProductAttribute(BaseModel):
+class Variant(models.Model):
+    """
+        Represents a variant of a product
+        e.g Product Nivea has Nivea Cocoa and Nivea Shea Butter
+    """
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="variants"
+    )
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    stock = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f'{self.product} {self.name}'
+
+
+class Size(models.Model):
+    """
+        Represents a size of a product
+        e.g 400g, 450ml etc or Small
+    """
+    size = models.IntegerField(
+        null=True,
+        blank=True,
+    )
+    size_type = models.CharField(
+        max_length=2,
+        choices=SIZE_TYPE_CHOICES,
+        null=True,
+        blank=True,
+    )
+
+    def __str___(self):
+        return f'{self.size}'
+
+
+class VariantSize(models.Model):
+    """
+        Represents a size of a product variant
+        e.g Product Nivea Cocoa has 400g and 450g sizes
+    """
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
+    size = models.ForeignKey(Size, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f'{self.variant} : {self.size} - {self.price}'
+
+
+class VariantAttribute(BaseModel):
     """
         This is a connection between a product and an attribute
         since it has many to many relationship
     """
     attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE)
     value = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f'{self.product} : {self.attribute} - {self.value}'
+        return f'{self.variant} : {self.attribute} - {self.value}'
 
 
 class ProductImage(BaseModel):
@@ -140,7 +221,7 @@ class ProductImage(BaseModel):
         Represents an image of a product
     """
     image = models.ImageField(upload_to='images/')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Variant, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         if not self.slug:
