@@ -33,7 +33,7 @@ class BaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    slug = models.SlugField(max_length=100, unique=True)
+    slug = models.SlugField(blank=True, null=True, max_length=100, unique=True)
 
     class Meta:
         """
@@ -62,7 +62,7 @@ class SubCategory(BaseModel):
         Represents a subcategory under a category
     """
     name = models.CharField(max_length=100)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ManyToManyField(Category, related_name='subcategories')
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -117,6 +117,9 @@ class ProductSubCategory(BaseModel):
     """
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.product} : {self.subcategory}'
 
 
 class ProductAttribute(BaseModel):
